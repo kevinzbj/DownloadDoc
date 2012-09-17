@@ -16,6 +16,7 @@
 - (IBAction)ppt:(id)sender;
 - (IBAction)pdf:(id)sender;
 - (IBAction)fakeFile:(id)sender;
+- (IBAction)clear:(id)sender;
 
 
 @end

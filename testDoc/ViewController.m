@@ -10,10 +10,12 @@
 
 @interface ViewController ()
 @property (assign, nonatomic) NSString *fileName;
+@property (assign, nonatomic) NSString *fileURL;
 @end
 
 @implementation ViewController
 @synthesize fileName;
+@synthesize fileURL;
 
 - (void)viewDidLoad
 {
@@ -67,10 +69,26 @@
     [self showFile:@"test.test"];
 }
 
+- (IBAction)clear:(id)sender {
+    DownLoadFileViewController *show=[[DownLoadFileViewController alloc] init];
+    [show clearDoc];
+    [show release];
+}
+
 #pragma mark DownLoadFile Delegate
 -(NSString *)setFileName
 {
     return self.fileName;
+}
+
+-(NSURL *)fileURL
+{
+    return [NSURL URLWithString:[NSString stringWithFormat:@"http://211.100.76.72:8010/%@",self.fileName]];
+}
+
+-(NSString *)setDictionary
+{
+    return @"test";
 }
 
 

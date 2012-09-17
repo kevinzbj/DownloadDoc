@@ -11,13 +11,15 @@
 #import "MBProgressHUD.h"
 @protocol DownLoadFileDelegate
 -(NSString *)setFileName;
+-(NSURL *)fileURL;
 @optional
 -(NSString *)setDictionary;
 @end
 
-#define DocumentDictionary @"DownloadFile";
+#define DocumentDictionary @"DownloadFile"
 
 @interface DownLoadFileViewController : UIViewController<ASIHTTPRequestDelegate,MBProgressHUDDelegate,UIAlertViewDelegate>
 @property (assign, nonatomic) id<DownLoadFileDelegate> delegate;
+-(void) clearDoc;
 
 @end

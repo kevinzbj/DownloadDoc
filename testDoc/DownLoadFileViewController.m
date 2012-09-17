@@ -12,15 +12,16 @@
 @property (retain, nonatomic) ASIHTTPRequest *request;
 @property (retain, nonatomic) UIWebView *webView;
 @property (retain, nonatomic) MBProgressHUD *hud;
-@property (retain, nonatomic) NSString *dictionary;
+@property (assign, nonatomic) NSString *dictionary;
 @end
 
 @implementation DownLoadFileViewController
 @synthesize request = _request;
 @synthesize webView = _webView;
 @synthesize hud = _hud;
-@synthesize delegate;
 @synthesize dictionary = _dictionary;
+@synthesize delegate;
+
 
 -(void)dealloc
 {
@@ -66,7 +67,21 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = nil;
 	// Do any additional setup after loading the view.
+    if([self.delegate respondsToSelector:@selector(setDictionary)])
+    {
+        self.dictionary = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[[DocumentDictionary stringByAppendingPathComponent:[self.delegate setDictionary]] stringByAppendingPathComponent:[self.delegate setFileName]]];
+        documentsDirectory = [[[path objectAtIndex:0] stringByAppendingPathComponent:DocumentDictionary] stringByAppendingPathComponent:[self.delegate setDictionary]];
+    }else{
+        self.dictionary = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[DocumentDictionary stringByAppendingPathComponent:[self.delegate setFileName]]];
+        
+        documentsDirectory = [[[path objectAtIndex:0] stringByAppendingPathComponent:DocumentDictionary] stringByAppendingPathComponent:[self.delegate setDictionary]];
+    }
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    [fileManager createDirectoryAtPath:documentsDirectory withIntermediateDirectories:YES attributes:nil error:nil];
     [self.webView addSubview:self.hud];
     [self initFile];
     [self.view addSubview:self.webView];
@@ -97,11 +112,9 @@
         [self readLocalDoc];
     }else
     {
-        //NSString *tmp = [NSString stringWithFormat:@"http://211.100.76.72:8010/%@",[self.delegate setFileName]];
-        NSURL *url = [NSURL URLWithString:[self.delegate setFileName]];
-        self.request = [ASIHTTPRequest requestWithURL:url];
+        self.request = [ASIHTTPRequest requestWithURL:[self.delegate fileURL]];
         [self.request setDelegate:self];
-        [self.request setDownloadDestinationPath:[[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[self.delegate setFileName]]];
+        [self.request setDownloadDestinationPath:self.dictionary];
         [self.request setDownloadProgressDelegate:self.hud];
         [self.request startAsynchronous];
         [self.hud show:YES];
@@ -110,15 +123,13 @@
 
 -(BOOL) checkFile
 {
-    NSString *filepath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[self.delegate setFileName]];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    return [fileManager fileExistsAtPath:filepath];
+    return [fileManager fileExistsAtPath:self.dictionary];
 }
 
 -(void) readLocalDoc
 {
-    NSString *fileurl = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[self.delegate setFileName]];
-    NSURL *url = [NSURL fileURLWithPath:fileurl];
+    NSURL *url = [NSURL fileURLWithPath:self.dictionary];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [self.webView loadRequest:request];
     self.webView.scalesPageToFit = YES;
@@ -126,9 +137,15 @@
 
 -(void) deleteFile
 {
-    NSString *filepath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:[self.delegate setFileName]];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager removeItemAtPath:filepath error:nil];
+    [fileManager removeItemAtPath:self.dictionary error:nil];
+}
+
+-(void) clearDoc
+{
+    NSString *path = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:DocumentDictionary];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [fileManager removeItemAtPath:path error:nil];
 }
 
 #pragma mark ASIHTTPRequest Delegate
