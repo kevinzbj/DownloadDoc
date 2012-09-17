@@ -30,7 +30,6 @@
     [super dealloc];
 }
 
-
 -(MBProgressHUD *)hud
 {
     if(!_hud)
